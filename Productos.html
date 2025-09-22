@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semillero de Investigación</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: #1a1a1a;
+            color: #f7f7f7;
+        }
+        .project-card, .modal-content {
+            background-color: #000000;
+            border: 1px solid #f7f7f7;
+            box-shadow: 4px 4px 0 #f7f7f7;
+            transition: all 0.2s ease-in-out;
+        }
+        .project-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 6px 6px 0 #f7f7f7;
+        }
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="white"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>');
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            background-size: 1em;
+            padding-right: 2rem;
+            cursor: pointer;
+        }
+        .filter-select {
+            background-color: #000000;
+            border: 1px solid #f7f7f7;
+            color: #f7f7f7;
+            transition: all 0.2s;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
+        }
+        .modal-content {
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            opacity: 0;
+            transform: scale(0.7);
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+        .modal.is-active .modal-content {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .slider-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .slider-image {
+            width: 100%;
+            height: auto;
+            border-radius: 0.5rem;
+        }
+        .slider-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 50%;
+            cursor: pointer;
+            user-select: none;
+        }
+        .slider-btn.prev {
+            left: 10px;
+        }
+        .slider-btn.next {
+            right: 10px;
+        }
+        .header-logo {
+            width: 250px;
+            height: 250px;
+        }
+        .filters-container {
+            background-color: #0d0d0d;
+            border: 1px solid #333333;
+            box-shadow: 2px 2px 0 #333333;
+        }
+        .filter-button {
+            background-color: #000000;
+            border: 1px solid #f7f7f7;
+            color: #f7f7f7;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 2px 2px 0 #f7f7f7;
+        }
+        .filter-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 4px 4px 0 #f7f7f7;
+        }
+        .filter-button.active {
+            background-color: #f7f7f7;
+            color: #1a1a1a;
+        }
+        .filter-popup-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 50;
+        }
+        .filter-popup-modal.is-active {
+            display: block;
+        }
+        .filter-popup-content {
+            position: absolute;
+            background-color: #0d0d0d;
+            border: 1px solid #f7f7f7;
+            box-shadow: 4px 4px 0 #f7f7f7;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            max-height: 50vh;
+            overflow-y: auto;
+            transform: translateY(-10px);
+            opacity: 0;
+            transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+        }
+        .filter-popup-modal.is-active .filter-popup-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <!-- Encabezado y Título -->
+    <header class="text-center mb-10 md:mb-16">
+        <img src="https://lh3.googleusercontent.com/sitesv/AICyYdZ3HbnFSPpDicl0BpilzSf8taH39pB43Q7dQ0-7RAgFJnNVNUut_r0e_repUNYnFlJVQMn6aQAW_t7BG9cnpxmzRi6mqKRBOZkfSRwcIuJEraK0RnuC7VR4iyuAHjqrwD1cAJkgekDBIPmKGxV7VJ76wvW1FANRjV7RbP2ILFtqlNM4pqsBUJ4oQ=w16383" alt="Semillero de Investigación Logo" class="w-full max-w-lg mx-auto h-auto header-logo">
+        <p class="mt-2 text-base md:text-lg italic">Proyectos Multimedia y Transmedia</p>
+    </header>
+
+    <!-- Botones de Filtros -->
+    <div class="filters-container p-6 rounded-lg mb-8 md:mb-12">
+        <div class="flex flex-col md:flex-row md:items-center justify-center gap-4">
+            <h3 class="text-lg font-semibold">Filtrar por:</h3>
+            <div class="flex flex-wrap gap-4 items-center justify-center">
+                <button class="filter-button" data-filter-id="type">Tipo</button>
+                <button class="filter-button" data-filter-id="theme">Temas</button>
+                <button class="filter-button" data-filter-id="media">Medios</button>
+                <button class="filter-button" data-filter-id="emotion">Emociones</button>
+                <button class="filter-button" data-filter-id="technique">Técnicas</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Contenedor de la Galería de Proyectos -->
+    <main id="project-gallery" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        <div id="loading" class="col-span-full text-center text-gray-400">Cargando proyectos...</div>
+    </main>
+
+    <!-- Modal para la Ficha de Proyecto -->
+    <div id="project-modal" class="modal">
+        <div class="modal-content relative rounded-lg p-6 md:p-8 w-11/12 md:w-3/4">
+            <button class="absolute top-4 right-4 text-xl font-bold" onclick="closeModal()">
+                &times;
+            </button>
+            <div id="modal-body">
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para los Filtros -->
+    <div id="filter-popup-modal" class="filter-popup-modal" onclick="closeFilterModal(event)">
+        <div id="filter-popup-content" class="filter-popup-content">
+            <!-- Botones de filtro se cargarán aquí -->
+        </div>
+    </div>
+
+    <script>
+        let projects = [];
+        const gallery = document.getElementById('project-gallery');
+        const projectModal = document.getElementById('project-modal');
+        const projectModalContent = document.querySelector('.modal-content');
+        const modalBody = document.getElementById('modal-body');
+        const filterButtons = document.querySelectorAll('.filter-button');
+        const filterPopupModal = document.getElementById('filter-popup-modal');
+        const filterPopupContent = document.getElementById('filter-popup-content');
+        
+        let filterState = {
+            type: 'all',
+            theme: 'all',
+            media: 'all',
+            emotion: 'all',
+            technique: 'all'
+        };
+
+        const filterMap = {
+            'type': 'Tipo de producto',
+            'theme': 'Palabras Clave',
+            'media': 'Medios',
+            'emotion': 'Emociones',
+            'technique': 'Tecnicas Empleadas'
+        };
+
+        function populateFilters() {
+            const allTypes = [...new Set(projects.flatMap(p => p['Tipo de producto'] || []))].sort();
+            const allThemes = [...new Set(projects.flatMap(p => p['Palabras Clave'] || []))].sort();
+            const allMedias = [...new Set(projects.flatMap(p => p.Medios || []))].sort();
+            const allEmotions = [...new Set(projects.flatMap(p => p.Emociones || []))].sort();
+            const allTechniques = [...new Set(projects.flatMap(p => p['Tecnicas Empleadas'] || []))].sort();
+
+            window.filterOptions = {
+                'type': allTypes,
+                'theme': allThemes,
+                'media': allMedias,
+                'emotion': allEmotions,
+                'technique': allTechniques
+            };
+        }
+        
+        function renderProjects() {
+            gallery.innerHTML = '';
+            
+            const filteredProjects = projects.filter(project => {
+                const matchesType = filterState.type === 'all' || (Array.isArray(project['Tipo de producto']) && project['Tipo de producto'].some(t => t.toLowerCase() === filterState.type.toLowerCase()));
+                const matchesTheme = filterState.theme === 'all' || (Array.isArray(project['Palabras Clave']) && project['Palabras Clave'].some(t => t.toLowerCase() === filterState.theme.toLowerCase()));
+                const matchesMedia = filterState.media === 'all' || (Array.isArray(project.Medios) && project.Medios.some(m => m.toLowerCase() === filterState.media.toLowerCase()));
+                const matchesEmotion = filterState.emotion === 'all' || (Array.isArray(project.Emociones) && project.Emociones.some(e => e.toLowerCase() === filterState.emotion.toLowerCase()));
+                const matchesTechnique = filterState.technique === 'all' || (Array.isArray(project['Tecnicas Empleadas']) && project['Tecnicas Empleadas'].some(t => t.toLowerCase() === filterState.technique.toLowerCase()));
+                
+                return matchesType && matchesTheme && matchesMedia && matchesEmotion && matchesTechnique;
+            });
+
+            if (filteredProjects.length === 0) {
+                gallery.innerHTML = '<p class="col-span-full text-center text-gray-400">No se encontraron proyectos con los filtros seleccionados.</p>';
+                return;
+            }
+
+            filteredProjects.forEach(project => {
+                const card = document.createElement('div');
+                card.classList.add('project-card', 'p-4', 'rounded-lg', 'cursor-pointer');
+                card.innerHTML = `
+                    <div class="w-full h-48 bg-gray-200 rounded-md overflow-hidden mb-4">
+                        <img src="${project.Imagen || 'https://placehold.co/400x300/e5e5e5/000000?text=Sin+Imagen'}" alt="Imagen del proyecto ${project['Nombre del Remix']}" class="w-full h-full object-cover rounded-md" onerror="this.onerror=null; this.src='https://placehold.co/400x300/e5e5e5/000000?text=Sin+Imagen';">
+                    </div>
+                    <h2 class="text-xl font-semibold mb-1">${project['Nombre del Remix']}</h2>
+                    <p class="text-sm italic text-gray-400 mb-2">${project.anio || 'Año no especificado'}</p>
+                    <p class="text-sm text-gray-300">${project['Descripción 100 palabras'] ? project['Descripción 100 palabras'].substring(0, 100) + '...' : ''}</p>
+                `;
+                card.onclick = () => showProjectDetails(project);
+                gallery.appendChild(card);
+            });
+        }
+
+        function showProjectDetails(project) {
+            let sliderHtml = '';
+            if (project.slider_urls && project.slider_urls.length > 0) {
+                sliderHtml = `
+                    <div class="slider-container mb-4">
+                        <img id="modal-image" src="${project.slider_urls[0]}" alt="Imagen del proyecto" class="slider-image">
+                        <div class="slider-btn prev" onclick="navigateSlider(-1)">&#10094;</div>
+                        <div class="slider-btn next" onclick="navigateSlider(1)">&#10095;</div>
+                    </div>
+                `;
+            } else {
+                sliderHtml = `
+                    <img src="${project.Imagen || 'https://placehold.co/600x450/e5e5e5/000000?text=Sin+Imagen'}" alt="Imagen del proyecto ${project['Nombre del Remix']}" class="w-full h-auto rounded-md mb-4" onerror="this.onerror=null; this.src='https://placehold.co/600x450/e5e5e5/000000?text=Sin+Imagen';">
+                `;
+            }
+
+            modalBody.innerHTML = `
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div class="md:w-1/2">
+                        <h2 class="text-3xl font-bold mb-2">${project['Nombre del Remix']}</h2>
+                        <p class="text-sm text-gray-400 mb-4">Autor(es): ${project['Creadores del Remix']}</p>
+                        ${sliderHtml}
+                        <p class="text-base leading-relaxed text-gray-300">${project['Descripción 100 palabras']}</p>
+                        <div class="mt-4">
+                            <h3 class="font-semibold text-lg">Acceso:</h3>
+                            <a href="${project['Acceso Medio Principal']}" target="_blank" class="text-blue-400 hover:underline">${project['Acceso Medio Principal']}</a>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2 grid grid-cols-1 gap-4">
+                        <div>
+                            <p class="font-semibold">Año:</p>
+                            <p class="text-gray-300">${project.anio || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold">Tipo:</p>
+                            <p class="text-gray-300">${(project['Tipo de producto'] || []).join(', ') || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold">Emociones:</p>
+                            <p class="text-gray-300">${(project.Emociones || []).join(', ') || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold">Temas:</p>
+                            <p class="text-gray-300">${(project['Palabras Clave'] || []).join(', ')}</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold">Medios:</p>
+                            <p class="text-gray-300">${(project.Medios || []).join(', ')}</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold">Técnicas:</p>
+                            <p class="text-gray-300">${(project['Tecnicas Empleadas'] || []).join(', ')}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            projectModal.style.display = 'flex';
+            setTimeout(() => {
+                projectModal.classList.add('is-active');
+            }, 10);
+
+
+            if (project.slider_urls && project.slider_urls.length > 0) {
+                projectModal.dataset.currentSlide = 0;
+                projectModal.dataset.images = JSON.stringify(project.slider_urls);
+            }
+        }
+
+        // Funciones para el carrusel
+        function navigateSlider(direction) {
+            const currentSlide = parseInt(projectModal.dataset.currentSlide);
+            const images = JSON.parse(projectModal.dataset.images);
+            let nextSlide = currentSlide + direction;
+            
+            if (nextSlide >= images.length) {
+                nextSlide = 0;
+            } else if (nextSlide < 0) {
+                nextSlide = images.length - 1;
+            }
+
+            document.getElementById('modal-image').src = images[nextSlide];
+            projectModal.dataset.currentSlide = nextSlide;
+        }
+
+        function closeModal() {
+            projectModal.classList.remove('is-active');
+            projectModal.addEventListener('transitionend', function handler() {
+                projectModal.style.display = 'none';
+                projectModal.removeEventListener('transitionend', handler);
+            });
+        }
+
+        window.onclick = function(event) {
+            if (event.target == projectModal) {
+                closeModal();
+            }
+        }
+
+        // Funciones para los nuevos filtros flotantes
+        filterButtons.forEach(button => {
+            button.addEventListener('click', (event) => {
+                const filterId = event.target.dataset.filterId;
+                openFilterModal(filterId, event.target);
+            });
+        });
+
+        function openFilterModal(filterId, buttonElement) {
+            const options = window.filterOptions[filterId];
+            filterPopupContent.innerHTML = '';
+            
+            // Botón para resetear el filtro
+            const allOptionButton = document.createElement('button');
+            allOptionButton.classList.add('p-2', 'block', 'w-full', 'text-left', 'hover:bg-gray-800', 'rounded-md');
+            allOptionButton.textContent = 'Todos';
+            allOptionButton.onclick = () => {
+                filterState[filterId] = 'all';
+                updateFilterButtons();
+                renderProjects();
+                closeFilterModal();
+            };
+            filterPopupContent.appendChild(allOptionButton);
+            
+            options.forEach(option => {
+                const button = document.createElement('button');
+                button.classList.add('p-2', 'block', 'w-full', 'text-left', 'hover:bg-gray-800', 'rounded-md');
+                button.textContent = option;
+                button.onclick = () => {
+                    filterState[filterId] = option;
+                    updateFilterButtons();
+                    renderProjects();
+                    closeFilterModal();
+                };
+                filterPopupContent.appendChild(button);
+            });
+
+            const rect = buttonElement.getBoundingClientRect();
+            filterPopupContent.style.top = `${rect.bottom + window.scrollY + 10}px`;
+            filterPopupContent.style.left = `${rect.left}px`;
+            filterPopupContent.style.minWidth = `${rect.width}px`;
+
+            filterPopupModal.classList.add('is-active');
+            // Detener la propagación del evento para que no se cierre inmediatamente
+            event.stopPropagation();
+        }
+
+        function closeFilterModal(event) {
+            if (event && event.target.id === 'filter-popup-modal') {
+                filterPopupModal.classList.remove('is-active');
+            } else if (!event) {
+                 filterPopupModal.classList.remove('is-active');
+            }
+        }
+
+        function updateFilterButtons() {
+            filterButtons.forEach(button => {
+                const filterId = button.dataset.filterId;
+                if (filterState[filterId] !== 'all') {
+                    button.classList.add('active');
+                    button.textContent = `${filterMap[filterId].split(' ')[0]}: ${filterState[filterId]}`;
+                } else {
+                    button.classList.remove('active');
+                    button.textContent = filterMap[filterId].split(' ')[0];
+                }
+            });
+        }
+        
+        async function fetchDataAndRender() {
+            try {
+                const scriptUrl = 'https://script.google.com/macros/s/AKfycbzc-VUIRPqOXweK_6jA0nxw2btjpwVmNhdGDxBpI3EoqFcAI2pP6cuLRZ9UEXuGDQc4/exec'; 
+                const response = await fetch(scriptUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`Error de red: ${response.statusText}`);
+                }
+                
+                projects = await response.json();
+                
+                populateFilters();
+                renderProjects();
+                updateFilterButtons(); // Initial update to reflect 'all' state
+
+            } catch (error) {
+                console.error("Error al cargar los datos:", error);
+                gallery.innerHTML = '<p class="col-span-full text-center text-red-500">Error al cargar los datos. Por favor, revisa la URL de tu script y asegúrate de haberlo desplegado correctamente.</p>';
+            }
+        }
+
+        // Cargar los datos al iniciar la página
+        fetchDataAndRender();
+    </script>
+</body>
+</html>
