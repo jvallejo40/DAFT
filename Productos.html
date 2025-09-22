@@ -204,7 +204,7 @@
             display: flex;
         }
         .filter-popup-content {
-            position: relative;
+            position: absolute;
             background-color: #0d0d0d;
             border: 1px solid #f7f7f7;
             box-shadow: 4px 4px 0 #f7f7f7;
@@ -285,7 +285,7 @@
 
     <!-- Modal para los Filtros -->
     <div id="filter-popup-modal" class="filter-popup-modal" onclick="closeFilterModal(event)">
-        <div id="filter-popup-content" class="filter-popup-content">
+        <div id="filter-popup-content" class="filter-popup-content" onclick="event.stopPropagation();">
         </div>
     </div>
 
