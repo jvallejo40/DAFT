@@ -11,12 +11,32 @@
             font-family: 'Prompt', sans-serif;
             background-color: #1a1a1a;
             color: #f7f7f7;
+            -webkit-tap-highlight-color: transparent;
+            scrollbar-width: thin;
+            scrollbar-color: #f7f7f7 transparent;
         }
+        
+        body::-webkit-scrollbar, .modal-content-wrapper::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        body::-webkit-scrollbar-track, .modal-content-wrapper::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        body::-webkit-scrollbar-thumb, .modal-content-wrapper::-webkit-scrollbar-thumb {
+            background-color: #f7f7f7;
+            border-radius: 4px;
+            border: 2px solid transparent;
+        }
+
         .project-card, .modal-content {
             background-color: #000000;
             border: 1px solid #f7f7f7;
             box-shadow: 4px 4px 0 #f7f7f7;
             transition: all 0.2s ease-in-out;
+            scrollbar-width: thin;
+            scrollbar-color: #f7f7f7 transparent;
         }
         .project-card:hover {
             transform: translateY(-2px);
@@ -57,10 +77,23 @@
         .modal-content {
             max-width: 90vw;
             max-height: 90vh;
-            overflow-y: auto;
             opacity: 0;
             transform: scale(0.7);
             transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            background-color: transparent;
+            border: none;
+            box-shadow: none;
+            padding: 0;
+        }
+        .modal-content-wrapper {
+            background-color: #000000;
+            border: 1px solid #f7f7f7;
+            box-shadow: 4px 4px 0 #f7f7f7;
+            border-radius: 0.5rem;
+            padding: 1.5rem 2.5rem 1.5rem 1.5rem;
+            overflow-y: auto;
+            max-height: 90vh;
+            position: relative;
         }
         .modal.is-active .modal-content {
             opacity: 1;
@@ -81,12 +114,24 @@
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            background-color: rgba(0, 0, 0, 0.5);
-            color: white;
-            padding: 0.5rem;
+            background-color: #000000;
+            color: #f7f7f7;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             border-radius: 50%;
+            font-size: 1.5rem;
             cursor: pointer;
             user-select: none;
+            border: 1px solid #f7f7f7;
+            box-shadow: 2px 2px 0 #f7f7f7;
+            transition: all 0.2s ease;
+        }
+        .slider-btn:hover {
+            transform: translateY(-50%) translateY(-1px) scale(1.05);
+            box-shadow: 4px 4px 0 #f7f7f7;
         }
         .slider-btn.prev {
             left: 10px;
@@ -94,9 +139,30 @@
         .slider-btn.next {
             right: 10px;
         }
+        .modal-close-btn {
+            background-color: #e57373;
+            color: #f7f7f7;
+            width: 1.875rem;
+            height: 1.875rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            font-weight: normal;
+            font-size: 1.25rem;
+            box-shadow: 2px 2px 0 #1a1a1a;
+            transition: all 0.2s;
+            border: 1px solid #1a1a1a;
+        }
+        .modal-close-btn:hover {
+            background-color: #1a1a1a;
+            color: #f7f7f7;
+            border: 1px solid #f7f7f7;
+            box-shadow: 4px 4px 0 #f7f7f7;
+        }
         .header-logo {
-            width: 250px;
-            height: 250px;
+            width: 75px;
+            height: 75px;
         }
         .filters-container {
             background-color: #0d0d0d;
@@ -130,12 +196,14 @@
             width: 100%;
             height: 100%;
             z-index: 50;
+            justify-content: center;
+            align-items: center;
         }
         .filter-popup-modal.is-active {
-            display: block;
+            display: flex;
         }
         .filter-popup-content {
-            position: absolute;
+            position: relative;
             background-color: #0d0d0d;
             border: 1px solid #f7f7f7;
             box-shadow: 4px 4px 0 #f7f7f7;
@@ -146,10 +214,32 @@
             transform: translateY(-10px);
             opacity: 0;
             transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+            min-width: 200px;
         }
         .filter-popup-modal.is-active .filter-popup-content {
             transform: translateY(0);
             opacity: 1;
+        }
+        .detail-label {
+            font-weight: 700;
+        }
+        .detail-text {
+            font-weight: 300;
+            font-size: 0.75rem;
+        }
+        
+        @media (max-width: 768px) {
+            .filter-popup-content {
+                width: 90%;
+                max-height: 80vh;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                position: fixed;
+            }
+            .filter-popup-modal.is-active .filter-popup-content {
+                transform: translate(-50%, -50%);
+            }
         }
     </style>
 </head>
@@ -157,7 +247,7 @@
 
     <!-- Encabezado y Título -->
     <header class="text-center mb-10 md:mb-16">
-        <img src="https://lh3.googleusercontent.com/sitesv/AICyYdZ3HbnFSPpDicl0BpilzSf8taH39pB43Q7dQ0-7RAgFJnNVNUut_r0e_repUNYnFlJVQMn6aQAW_t7BG9cnpxmzRi6mqKRBOZkfSRwcIuJEraK0RnuC7VR4iyuAHjqrwD1cAJkgekDBIPmKGxV7VJ76wvW1FANRjV7RbP2ILFtqlNM4pqsBUJ4oQ=w16383" alt="Semillero de Investigación Logo" class="w-full max-w-lg mx-auto h-auto header-logo">
+        <img src="https://www.jaimesiva.com/wp-content/uploads/2025/09/unnamed.gif" alt="Semillero de Investigación Logo" class="w-full max-w-lg mx-auto h-auto header-logo">
         <p class="mt-2 text-base md:text-lg italic">Proyectos Multimedia y Transmedia</p>
     </header>
 
@@ -182,11 +272,13 @@
 
     <!-- Modal para la Ficha de Proyecto -->
     <div id="project-modal" class="modal">
-        <div class="modal-content relative rounded-lg p-6 md:p-8 w-11/12 md:w-3/4">
-            <button class="absolute top-4 right-4 text-xl font-bold" onclick="closeModal()">
+        <div class="modal-content relative w-11/12 md:w-3/4">
+            <button class="absolute top-4 right-4 modal-close-btn" onclick="closeModal()">
                 &times;
             </button>
-            <div id="modal-body">
+            <div class="modal-content-wrapper relative rounded-lg p-6 md:p-8 overflow-y-auto max-h-[90vh]">
+                <div id="modal-body">
+                </div>
             </div>
         </div>
     </div>
@@ -202,7 +294,6 @@
         let projects = [];
         const gallery = document.getElementById('project-gallery');
         const projectModal = document.getElementById('project-modal');
-        const projectModalContent = document.querySelector('.modal-content');
         const modalBody = document.getElementById('modal-body');
         const filterButtons = document.querySelectorAll('.filter-button');
         const filterPopupModal = document.getElementById('filter-popup-modal');
@@ -280,8 +371,6 @@
                 sliderHtml = `
                     <div class="slider-container mb-4">
                         <img id="modal-image" src="${project.slider_urls[0]}" alt="Imagen del proyecto" class="slider-image">
-                        <div class="slider-btn prev" onclick="navigateSlider(-1)">&#10094;</div>
-                        <div class="slider-btn next" onclick="navigateSlider(1)">&#10095;</div>
                     </div>
                 `;
             } else {
@@ -291,41 +380,65 @@
             }
 
             modalBody.innerHTML = `
-                <div class="flex flex-col md:flex-row gap-6">
-                    <div class="md:w-1/2">
-                        <h2 class="text-3xl font-bold mb-2">${project['Nombre del Remix']}</h2>
-                        <p class="text-sm text-gray-400 mb-4">Autor(es): ${project['Creadores del Remix']}</p>
+                <div class="flex flex-col gap-6">
+                    <!-- Título y Autores -->
+                    <div>
+                        <h2 class="text-3xl font-bold">${project['Nombre del Remix']}</h2>
+                        <p class="text-sm text-gray-400">Autor(es):<br>${project['Creadores del Remix']}</p>
+                    </div>
+                    
+                    <!-- Slider y botones -->
+                    <div class="relative w-full">
                         ${sliderHtml}
-                        <p class="text-base leading-relaxed text-gray-300">${project['Descripción 100 palabras']}</p>
-                        <div class="mt-4">
-                            <h3 class="font-semibold text-lg">Acceso:</h3>
-                            <a href="${project['Acceso Medio Principal']}" target="_blank" class="text-blue-400 hover:underline">${project['Acceso Medio Principal']}</a>
+                        <div class="absolute inset-y-0 left-0 flex items-center justify-start p-2">
+                            <button class="slider-btn" onclick="navigateSlider(-1)">
+                                &#10094;
+                            </button>
+                        </div>
+                        <div class="absolute inset-y-0 right-0 flex items-center justify-end p-2">
+                            <button class="slider-btn" onclick="navigateSlider(1)">
+                                &#10095;
+                            </button>
                         </div>
                     </div>
-                    <div class="md:w-1/2 grid grid-cols-1 gap-4">
+
+                    <!-- Botón de Acceso -->
+                    <div class="mt-4">
+                        <a href="${project['Acceso Medio Principal']}" target="_blank" class="filter-button">
+                            Acceso a el proyecto completo
+                        </a>
+                    </div>
+
+                    <!-- Descripción -->
+                    <div>
+                        <p class="leading-relaxed text-gray-300 font-light text-sm">${project['Descripción 100 palabras']}</p>
+                    </div>
+
+                    <!-- Detalles del Proyecto (compactos) -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-6">
                         <div>
-                            <p class="font-semibold">Año:</p>
-                            <p class="text-gray-300">${project.anio || 'N/A'}</p>
+                            <p class="detail-label text-gray-200">Año:</p>
+                            <p class="text-gray-300 font-light text-sm">${project.anio || 'N/A'}</p>
                         </div>
                         <div>
-                            <p class="font-semibold">Tipo:</p>
-                            <p class="text-gray-300">${(project['Tipo de producto'] || []).join(', ') || 'N/A'}</p>
+                            <p class="detail-label text-gray-200">Tipo:</p>
+                            <p class="text-gray-300 font-light text-sm">${(project['Tipo de producto'] || []).join(', ') || 'N/A'}</p>
                         </div>
                         <div>
-                            <p class="font-semibold">Emociones:</p>
-                            <p class="text-gray-300">${(project.Emociones || []).join(', ') || 'N/A'}</p>
+                            <p class="detail-label text-gray-200">Emociones:</p>
+                            <p class="text-gray-300 font-light text-sm">${(project.Emociones || []).join(', ') || 'N/A'}</p>
                         </div>
                         <div>
-                            <p class="font-semibold">Temas:</p>
-                            <p class="text-gray-300">${(project['Palabras Clave'] || []).join(', ')}</p>
+                            <p class="detail-label text-gray-200">Temas:</p>
+                            <p class="text-gray-300 font-light text-sm">${(project['Palabras Clave'] || []).join(', ')}</p>
                         </div>
                         <div>
-                            <p class="font-semibold">Medios:</p>
-                            <p class="text-gray-300">${(project.Medios || []).join(', ')}</p>
+                            <p class="detail-label text-gray-200">Medios:</p>
+                            <p class="text-gray-300 font-light text-sm">${(project.Medios || []).join(', ')}</p>
                         </div>
                         <div>
-                            <p class="font-semibold">Técnicas:</p>
-                            <p class="text-gray-300">${(project['Tecnicas Empleadas'] || []).join(', ')}</p>
+                            <p class="detail-label text-gray-200">Técnicas:</p>
+                            <p class="text-gray-300 font-light text-sm">${(project['Tecnicas Empleadas'] || []).join(', ')}</p>
                         </div>
                     </div>
                 </div>
@@ -342,7 +455,6 @@
             }
         }
 
-        // Funciones para el carrusel
         function navigateSlider(direction) {
             const currentSlide = parseInt(projectModal.dataset.currentSlide);
             const images = JSON.parse(projectModal.dataset.images);
@@ -372,7 +484,6 @@
             }
         }
 
-        // Funciones para los nuevos filtros flotantes
         filterButtons.forEach(button => {
             button.addEventListener('click', (event) => {
                 const filterId = event.target.dataset.filterId;
@@ -384,7 +495,6 @@
             const options = window.filterOptions[filterId];
             filterPopupContent.innerHTML = '';
             
-            // Botón para resetear el filtro
             const allOptionButton = document.createElement('button');
             allOptionButton.classList.add('p-2', 'block', 'w-full', 'text-left', 'hover:bg-gray-800', 'rounded-md');
             allOptionButton.textContent = 'Todos';
@@ -410,12 +520,19 @@
             });
 
             const rect = buttonElement.getBoundingClientRect();
-            filterPopupContent.style.top = `${rect.bottom + window.scrollY + 10}px`;
-            filterPopupContent.style.left = `${rect.left}px`;
-            filterPopupContent.style.minWidth = `${rect.width}px`;
+            if (window.innerWidth > 768) {
+                filterPopupContent.style.top = `${rect.bottom + window.scrollY + 10}px`;
+                filterPopupContent.style.left = `${rect.left}px`;
+                filterPopupContent.style.minWidth = `${rect.width}px`;
+            } else {
+                filterPopupContent.style.top = '50%';
+                filterPopupContent.style.left = '50%';
+                filterPopupContent.style.transform = 'translate(-50%, -50%)';
+                filterPopupContent.style.minWidth = 'auto';
+                filterPopupContent.style.width = '90%';
+            }
 
             filterPopupModal.classList.add('is-active');
-            // Detener la propagación del evento para que no se cierre inmediatamente
             event.stopPropagation();
         }
 
@@ -453,7 +570,7 @@
                 
                 populateFilters();
                 renderProjects();
-                updateFilterButtons(); // Initial update to reflect 'all' state
+                updateFilterButtons();
 
             } catch (error) {
                 console.error("Error al cargar los datos:", error);
@@ -461,7 +578,6 @@
             }
         }
 
-        // Cargar los datos al iniciar la página
         fetchDataAndRender();
     </script>
 </body>
