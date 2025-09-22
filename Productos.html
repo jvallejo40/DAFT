@@ -91,9 +91,9 @@
             box-shadow: 4px 4px 0 #f7f7f7;
             border-radius: 0.5rem;
             padding: 1.5rem 2.5rem 1.5rem 1.5rem;
-            overflow-y: auto;
-            max-height: 90vh;
             position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
         }
         .modal.is-active .modal-content {
             opacity: 1;
@@ -153,6 +153,7 @@
             box-shadow: 2px 2px 0 #1a1a1a;
             transition: all 0.2s;
             border: 1px solid #1a1a1a;
+            z-index: 10;
         }
         .modal-close-btn:hover {
             background-color: #1a1a1a;
@@ -246,9 +247,8 @@
 <body class="p-4 md:p-8">
 
     <!-- Encabezado y Título -->
-    <header class="text-center mb-10 md:mb-16">
-        <img src="https://www.jaimesiva.com/wp-content/uploads/2025/09/unnamed.gif" alt="Semillero de Investigación Logo" class="w-full max-w-lg mx-auto h-auto header-logo">
-        <p class="mt-2 text-base md:text-lg italic">Proyectos Multimedia y Transmedia</p>
+    <header class="text-center mb-5 md:mb-5">
+        <img src="https://www.jaimesiva.com/wp-content/uploads/2025/09/unnamed.gif" alt="Semillero de Investigación Logo" class="w-[150px] h-[150px] mx-auto mb-4">
     </header>
 
     <!-- Botones de Filtros -->
@@ -272,11 +272,11 @@
 
     <!-- Modal para la Ficha de Proyecto -->
     <div id="project-modal" class="modal">
+        <button class="modal-close-btn absolute top-[20px] right-[20px]" onclick="closeModal()">
+            &times;
+        </button>
         <div class="modal-content relative w-11/12 md:w-3/4">
-            <button class="absolute top-4 right-4 modal-close-btn" onclick="closeModal()">
-                &times;
-            </button>
-            <div class="modal-content-wrapper relative rounded-lg p-6 md:p-8 overflow-y-auto max-h-[90vh]">
+            <div class="modal-content-wrapper relative rounded-lg p-6 md:p-8">
                 <div id="modal-body">
                 </div>
             </div>
@@ -286,7 +286,6 @@
     <!-- Modal para los Filtros -->
     <div id="filter-popup-modal" class="filter-popup-modal" onclick="closeFilterModal(event)">
         <div id="filter-popup-content" class="filter-popup-content">
-            <!-- Botones de filtro se cargarán aquí -->
         </div>
     </div>
 
@@ -335,11 +334,11 @@
             gallery.innerHTML = '';
             
             const filteredProjects = projects.filter(project => {
-                const matchesType = filterState.type === 'all' || (Array.isArray(project['Tipo de producto']) && project['Tipo de producto'].some(t => t.toLowerCase() === filterState.type.toLowerCase()));
-                const matchesTheme = filterState.theme === 'all' || (Array.isArray(project['Palabras Clave']) && project['Palabras Clave'].some(t => t.toLowerCase() === filterState.theme.toLowerCase()));
-                const matchesMedia = filterState.media === 'all' || (Array.isArray(project.Medios) && project.Medios.some(m => m.toLowerCase() === filterState.media.toLowerCase()));
-                const matchesEmotion = filterState.emotion === 'all' || (Array.isArray(project.Emociones) && project.Emociones.some(e => e.toLowerCase() === filterState.emotion.toLowerCase()));
-                const matchesTechnique = filterState.technique === 'all' || (Array.isArray(project['Tecnicas Empleadas']) && project['Tecnicas Empleadas'].some(t => t.toLowerCase() === filterState.technique.toLowerCase()));
+                const matchesType = filterState.type === 'all' || (Array.isArray(project['Tipo de producto']) && project['Tipo de producto'].includes(filterState.type));
+                const matchesTheme = filterState.theme === 'all' || (Array.isArray(project['Palabras Clave']) && project['Palabras Clave'].includes(filterState.theme));
+                const matchesMedia = filterState.media === 'all' || (Array.isArray(project.Medios) && project.Medios.includes(filterState.media));
+                const matchesEmotion = filterState.emotion === 'all' || (Array.isArray(project.Emociones) && project.Emociones.includes(filterState.emotion));
+                const matchesTechnique = filterState.technique === 'all' || (Array.isArray(project['Tecnicas Empleadas']) && project['Tecnicas Empleadas'].includes(filterState.technique));
                 
                 return matchesType && matchesTheme && matchesMedia && matchesEmotion && matchesTechnique;
             });
