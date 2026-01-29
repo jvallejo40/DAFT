@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>El Copiador - Carta Monstruosa</title>
+    <title>El Copiador - Archivo Monstruoso</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Creepster&family=Fredoka:wght@400;600&family=Rubik:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka:wght@400;600&family=Rubik:wght@400;700&display=swap" rel="stylesheet">
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
         :root {
-            --card-width: 320px;
-            --card-height: 520px;
+            --card-width: 300px; /* Un poco más pequeña para móviles */
+            --card-height: 480px;
             --bg-purple: #9d70ff;
             --bg-beige: #f4edda;
             --border-purple: #7c3aed;
@@ -27,16 +27,25 @@
             background-color: #1e1b4b;
             color: #333;
             font-family: 'Fredoka', sans-serif;
-            overflow: hidden;
-            touch-action: none;
+            overflow-x: hidden; /* Evitar scroll horizontal */
         }
 
-        /* --- 3D Scene --- */
+        /* --- Layout Principal --- */
+        .main-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* --- 3D Scene Simplificada --- */
         .scene {
-            perspective: 1200px; /* Aumentado ligeramente para suavizar la distorsión */
+            perspective: 1000px;
             width: var(--card-width);
             height: var(--card-height);
-            margin: 0 auto;
             position: relative;
             z-index: 10;
         }
@@ -46,36 +55,36 @@
             height: 100%;
             position: relative;
             transform-style: preserve-3d;
-            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-            border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            cursor: pointer;
-            transform-origin: center center; /* Asegura que gire sobre su propio centro */
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            /* Animación suave de flotación por defecto */
+            animation: float 6s ease-in-out infinite;
+            transition: transform 0.2s ease-out; /* Para el movimiento del mouse/touch */
         }
 
-        /* --- Faces --- */
+        @keyframes float {
+            0% { transform: translateY(0px) rotateX(0deg); }
+            50% { transform: translateY(-10px) rotateX(2deg); }
+            100% { transform: translateY(0px) rotateX(0deg); }
+        }
+
+        /* --- Diseño de la Carta (Solo Frente) --- */
         .card-face {
             position: absolute;
             width: 100%;
             height: 100%;
-            backface-visibility: hidden;
             border-radius: 24px;
             overflow: hidden;
             border: 6px solid #6d28d9; 
-            -webkit-font-smoothing: antialiased;
-        }
-
-        /* --- FRONT DESIGN --- */
-        .card-front {
             background-color: var(--bg-purple);
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.1'/%3E%3C/svg%3E");
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 15px;
-            z-index: 2;
         }
 
+        /* Header de la carta */
         .header-capsule {
             width: 100%;
             height: 50px;
@@ -88,7 +97,7 @@
             margin-bottom: 15px;
             position: relative;
             box-shadow: 0 4px 0 rgba(0,0,0,0.1);
-            flex-shrink: 0; /* Evita que se aplaste */
+            flex-shrink: 0;
         }
 
         .header-circle {
@@ -117,31 +126,16 @@
             padding-right: 10px;
         }
 
-        .header-capsule::before, .header-capsule::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 0; 
-            height: 0; 
-            border-top: 8px solid transparent;
-            border-bottom: 8px solid transparent;
-        }
-        .header-capsule::before { left: -10px; border-right: 10px solid #6d28d9; }
-        .header-capsule::after { right: -10px; border-left: 10px solid #6d28d9; }
-
-        /* --- CORRECCIÓN IMAGEN: FILL & CROP --- */
+        /* Imagen de la carta */
         .image-container-stitched {
             width: 100%;
             background-color: var(--bg-beige);
             border-radius: 20px;
             position: relative;
-            /* Eliminamos padding para que la imagen toque los bordes */
             padding: 0; 
             box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
             flex-grow: 1;
-            display: flex; /* Mantiene la imagen centrada si fuera pequeña, pero con cover no importa */
-            margin-bottom: 0;
+            display: flex;
             border-bottom-left-radius: 0;
             border-bottom-right-radius: 0;
             z-index: 1;
@@ -151,26 +145,26 @@
         .stitch-border {
             position: absolute;
             top: 10px; left: 10px; right: 10px; bottom: 0;
-            border: 2px dashed #d1c4a5; /* Color del hilo */
+            border: 2px dashed #d1c4a5;
             border-radius: 15px;
             border-bottom: none;
             pointer-events: none;
-            z-index: 10; /* Encima de la imagen */
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.05); /* Sombra interna sutil */
+            z-index: 10;
         }
 
         .character-img-styled {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Rellena todo el espacio recortando sobrantes */
-            object-position: center center; /* Centra el recorte */
+            object-fit: cover;
+            object-position: center top; /* Enfoca la cara */
             display: block;
         }
 
+        /* Footer de la carta */
         .bottom-box {
             width: 100%;
             background-color: #ede2c5;
-            min-height: 140px;
+            min-height: 120px;
             border-bottom-left-radius: 16px;
             border-bottom-right-radius: 16px;
             padding: 15px;
@@ -179,21 +173,7 @@
             flex-shrink: 0;
         }
 
-        /* --- BACK DESIGN --- */
-        .card-back {
-            background: linear-gradient(135deg, #2e1065 0%, #000000 100%);
-            transform: rotateY(180deg);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            color: white;
-            overflow-y: auto;
-            border: 6px solid #6d28d9;
-        }
-
-        .card-back::-webkit-scrollbar { width: 4px; }
-        .card-back::-webkit-scrollbar-thumb { background: #d946ef; border-radius: 2px; }
-
+        /* Holograma simplificado */
         .hologram-overlay {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -201,28 +181,57 @@
             z-index: 20;
             mix-blend-mode: overlay;
             pointer-events: none;
-            opacity: 0.6;
+            opacity: 0.5;
             background-size: 200% 200%;
-            transition: all 0.1s ease;
         }
 
-        #ios-permission {
-            display: none;
-            position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 50;
-            background: rgba(30, 27, 75, 0.95);
-            padding: 30px;
-            border-radius: 20px;
+        /* --- MÓDULOS DE INFORMACIÓN (Nuevos) --- */
+        .info-module {
+            background: #2e1065;
+            border: 2px solid #7c3aed;
+            border-radius: 16px;
+            padding: 20px;
+            width: 100%;
+            color: white;
+            box-shadow: 0 10px 0 rgba(0,0,0,0.2); /* Sombra dura estilo cartoon */
+            margin-bottom: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-module::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 6px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .module-title {
+            font-family: 'Bangers', cursive;
+            font-size: 1.5rem;
+            color: #c084fc;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px dashed #4c1d95;
+            padding-bottom: 5px;
+        }
+
+        /* Estilos específicos para stats */
+        .stat-grid {
+            display: grid;
+            grid-cols-2;
+            gap: 15px;
+        }
+        
+        .stat-box {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 10px;
             text-align: center;
-            border: 4px solid #8b5cf6;
-            width: 85%;
-            max-width: 300px;
-            box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
         }
 
-        h1, h2, h3 { margin: 0; }
         .tag-pill {
             background: #6d28d9;
             color: white;
@@ -232,54 +241,37 @@
             font-weight: bold;
             display: inline-block;
             margin-right: 5px;
-            box-shadow: 0 2px 0 rgba(0,0,0,0.2);
         }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1e1b4b; }
+        ::-webkit-scrollbar-thumb { background: #7c3aed; border-radius: 3px; }
     </style>
 </head>
-<body class="flex items-center justify-center h-screen bg-slate-900 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
+<body class="bg-slate-900 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
 
-    <!-- IOS PERMISSION -->
-    <div id="ios-permission">
-        <i data-lucide="scan-face" class="w-16 h-16 mx-auto text-purple-400 mb-4"></i>
-        <h2 class="text-2xl font-bangers text-white mb-2 tracking-wide">Activar Sensores</h2>
-        <p class="text-purple-200 mb-6 text-sm font-sans">Para ver el efecto holográfico, necesitamos acceso al giroscopio.</p>
-        <button id="btn-grant" class="bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 px-8 rounded-full shadow-lg w-full transform transition hover:scale-105">
-            ¡ACTIVAR!
-        </button>
-    </div>
-
-    <!-- MAIN APP CONTAINER -->
-    <div id="app-container" class="w-full h-full flex flex-col items-center justify-center relative">
+    <div class="main-container">
         
-        <!-- Hint Top -->
-        <div class="absolute top-10 text-center animate-bounce z-0 opacity-70 pointer-events-none">
-            <p class="text-xs tracking-widest text-purple-300 font-mono">
-                <span class="hidden md:inline">MUEVE EL CURSOR</span>
-                <span class="md:hidden">INCLINA EL MOVIL</span>
-            </p>
-        </div>
-
-        <!-- 3D CARD SCENE -->
+        <!-- --- SECCIÓN 1: LA CARTA VISUAL --- -->
         <div class="scene">
             <div class="card" id="card">
-                
-                <!-- FRONT -->
-                <div class="card-face card-front relative">
-                    <div class="hologram-overlay" id="holo-front"></div>
+                <div class="card-face">
+                    <div class="hologram-overlay" id="holo"></div>
                     
+                    <!-- Header -->
                     <div class="header-capsule">
                         <div class="header-circle">4</div> 
                         <div class="header-title">EL COPIADOR</div>
                     </div>
 
+                    <!-- Imagen -->
                     <div class="image-container-stitched">
-                        <!-- El borde punteado ahora flota ENCIMA de la imagen -->
                         <div class="stitch-border"></div>
-                        
-                        <!-- Imagen con crop centrado y relleno total -->
-                        <img src="https://www.jaimesiva.com/wp-content/uploads/2026/01/04.-El-Copiador.jpg" alt="El Copiador" class="character-img-styled" id="char-img" onerror="this.src='https://placehold.co/400x400/202020/d946ef?text=IMAGEN+NO+DISPONIBLE';">
+                        <img src="https://www.jaimesiva.com/wp-content/uploads/2026/01/04.-El-Copiador.jpg" alt="El Copiador" class="character-img-styled" onerror="this.src='https://placehold.co/400x600/202020/d946ef?text=IMAGEN+ERROR';">
                     </div>
 
+                    <!-- Footer -->
                     <div class="bottom-box">
                         <div class="mb-2">
                             <span class="tag-pill">Digital</span>
@@ -289,80 +281,84 @@
                             <i data-lucide="quote" class="w-3 h-3 inline text-purple-500 mb-2"></i>
                             Parece inofensivo con su pelaje rosa, pero sus múltiples ojos lo ven todo para robar tu identidad.
                         </p>
-                        <div class="absolute bottom-3 right-4">
-                             <p class="text-[10px] text-purple-800 font-bold opacity-60 flex items-center gap-1">
-                                <i data-lucide="rotate-cw" class="w-3 h-3"></i> VOLTEAR
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- BACK -->
-                <div class="card-face card-back">
-                    <div class="hologram-overlay" id="holo-back"></div>
-                    
-                    <div class="flex justify-between items-center mb-4 border-b border-purple-700 pb-2">
-                        <h2 class="text-xl text-purple-400 font-bangers tracking-wider">DATOS SECRETOS</h2>
-                        <i data-lucide="file-warning" class="text-pink-500"></i>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2 mb-4">
-                        <div class="bg-purple-900/50 p-2 rounded border border-purple-700">
-                            <span class="text-[10px] text-purple-300 block uppercase">Peligro</span>
-                            <span class="text-red-400 font-bold text-sm">🔴 ALTA</span>
-                        </div>
-                        <div class="bg-purple-900/50 p-2 rounded border border-purple-700">
-                            <span class="text-[10px] text-purple-300 block uppercase">Debilidad</span>
-                            <span class="text-green-400 font-bold text-sm">La Verdad</span>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <h3 class="text-cyan-400 font-bangers text-lg border-b border-cyan-800 mb-1">Habilidad: Espejo Tramposo</h3>
-                        <p class="text-xs text-gray-300 leading-relaxed">
-                            Crea una copia casi perfecta de un perfil de amigo o inventa uno "genial" para que aceptes su solicitud.
-                        </p>
-                    </div>
-
-                    <div class="mt-auto bg-gray-800 rounded-xl p-3 border-2 border-green-500 relative overflow-hidden">
-                        <div class="absolute top-0 right-0 bg-green-500 text-black text-[10px] font-bold px-2 py-1 rounded-bl-lg">
-                            DEFENSA
-                        </div>
-                        <h3 class="text-green-400 font-bold font-bangers text-lg mb-2 flex items-center gap-2">
-                            <i data-lucide="shield-check" class="w-5 h-5"></i>
-                            ESCUDO ANTI-COPIA
-                        </h3>
-                        <ul class="text-[11px] space-y-2 text-gray-200">
-                            <li class="flex gap-2 items-start">
-                                <i data-lucide="check" class="w-3 h-3 text-green-500 mt-1 flex-shrink-0"></i>
-                                <span><strong>Prueba del Doble:</strong> Pregunta en la vida real si fue él.</span>
-                            </li>
-                            <li class="flex gap-2 items-start">
-                                <i data-lucide="lock" class="w-3 h-3 text-green-500 mt-1 flex-shrink-0"></i>
-                                <span><strong>Perfil Privado:</strong> Que no vea tus fotos.</span>
-                            </li>
-                        </ul>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Hint Bottom -->
-        <div class="absolute bottom-8 flex gap-4 text-center z-0 opacity-80">
-            <div class="flex flex-col items-center">
-                <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center border border-white/20 mb-1 backdrop-blur-sm">
-                    <i data-lucide="mouse-pointer-2" class="text-white hidden md:block"></i>
-                    <i data-lucide="smartphone" class="text-white md:hidden animate-pulse"></i>
+        <!-- --- SECCIÓN 2: INFORMACIÓN DETALLADA (MÓDULOS) --- -->
+        
+        <!-- Módulo: Datos de Combate -->
+        <div class="info-module border-red-500/50">
+            <h3 class="module-title text-red-400">
+                <i data-lucide="siren" class="w-6 h-6"></i>
+                ANÁLISIS DE RIESGO
+            </h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="stat-box border border-red-500/30">
+                    <span class="text-xs text-gray-400 uppercase block mb-1">Peligrosidad</span>
+                    <span class="text-red-400 font-bold text-xl">🔴 ALTA</span>
                 </div>
-                <span class="text-[10px] text-gray-400 uppercase font-bold md:hidden">Inclina</span>
-                <span class="text-[10px] text-gray-400 uppercase font-bold hidden md:inline">Mueve Mouse</span>
-            </div>
-            <div class="flex flex-col items-center">
-                <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center border border-white/20 mb-1 backdrop-blur-sm">
-                    <i data-lucide="touchpad" class="text-white"></i>
+                <div class="stat-box border border-green-500/30">
+                    <span class="text-xs text-gray-400 uppercase block mb-1">Debilidad</span>
+                    <span class="text-green-400 font-bold text-xl">LA VERDAD</span>
                 </div>
-                <span class="text-[10px] text-gray-400 uppercase font-bold">Clic / Toca</span>
             </div>
+        </div>
+
+        <!-- Módulo: Habilidad -->
+        <div class="info-module border-cyan-500/50">
+            <h3 class="module-title text-cyan-400">
+                <i data-lucide="zap" class="w-6 h-6"></i>
+                HABILIDAD ESPECIAL
+            </h3>
+            <div class="bg-cyan-900/30 p-3 rounded-lg border-l-4 border-cyan-500">
+                <h4 class="font-bold text-cyan-200 mb-1">"El Espejo Tramposo"</h4>
+                <p class="text-sm text-gray-300">
+                    Crea una copia casi perfecta del perfil de alguien que conoces o inventa un personaje genial para enviarte una solicitud de amistad falsa.
+                </p>
+            </div>
+        </div>
+
+        <!-- Módulo: Defensa (Interactivo) -->
+        <div class="info-module border-green-500">
+            <h3 class="module-title text-green-400">
+                <i data-lucide="shield-check" class="w-6 h-6"></i>
+                PROTOCOLO DE DEFENSA
+            </h3>
+            <ul class="space-y-3">
+                <li class="flex gap-3 bg-gray-900/50 p-3 rounded-lg items-start">
+                    <div class="bg-green-500/20 p-2 rounded-full mt-1">
+                        <i data-lucide="users" class="w-4 h-4 text-green-400"></i>
+                    </div>
+                    <div>
+                        <strong class="text-green-300 block text-sm">Prueba del Doble</strong>
+                        <p class="text-xs text-gray-400">Si un amigo te agrega "de nuevo", pregúntale en la vida real si fue él.</p>
+                    </div>
+                </li>
+                <li class="flex gap-3 bg-gray-900/50 p-3 rounded-lg items-start">
+                    <div class="bg-green-500/20 p-2 rounded-full mt-1">
+                        <i data-lucide="lock" class="w-4 h-4 text-green-400"></i>
+                    </div>
+                    <div>
+                        <strong class="text-green-300 block text-sm">Candado Mágico</strong>
+                        <p class="text-xs text-gray-400">Mantén tus perfiles "Privados" para que no pueda robar tus fotos.</p>
+                    </div>
+                </li>
+                <li class="flex gap-3 bg-gray-900/50 p-3 rounded-lg items-start">
+                    <div class="bg-green-500/20 p-2 rounded-full mt-1">
+                        <i data-lucide="key" class="w-4 h-4 text-green-400"></i>
+                    </div>
+                    <div>
+                        <strong class="text-green-300 block text-sm">Palabra Secreta</strong>
+                        <p class="text-xs text-gray-400">Ten una clave secreta con tus mejores amigos para verificarlos en el chat.</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="text-center text-gray-500 text-xs mt-4 mb-8">
+            <p>Archivo Confidencial #004 - Agencia de Ciberseguridad Infantil</p>
         </div>
 
     </div>
@@ -370,106 +366,45 @@
     <script>
         lucide.createIcons();
 
+        // Efecto visual simple (Parallax suave al mover el mouse/dedo)
+        // No requiere permisos de giroscopio, funciona con coordenadas simples
         const card = document.getElementById('card');
-        const holoFront = document.getElementById('holo-front');
-        const holoBack = document.getElementById('holo-back');
-        const charImg = document.getElementById('char-img');
-        const iosPermissionOverlay = document.getElementById('ios-permission');
-        const btnGrant = document.getElementById('btn-grant');
+        const holo = document.getElementById('holo');
         
-        let isFlipped = false;
-        let motionEnabled = false;
-        let isDesktop = window.matchMedia("(min-width: 1025px)").matches;
-        let lastTiltX = 0;
-        let lastTiltY = 0;
-
-        // 1. Flip Logic
-        card.addEventListener('click', () => {
-            isFlipped = !isFlipped;
-            // Al girar, reiniciamos la rotación base sin tilt momentáneamente para evitar saltos
-            updateCardTransform(lastTiltX, lastTiltY);
+        document.addEventListener('mousemove', (e) => {
+            animateCard(e.clientX, e.clientY);
         });
 
-        // 2. iOS Permission
-        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-            iosPermissionOverlay.style.display = 'block';
-            btnGrant.addEventListener('click', () => {
-                DeviceOrientationEvent.requestPermission()
-                    .then(response => {
-                        if (response === 'granted') {
-                            motionEnabled = true;
-                            iosPermissionOverlay.style.display = 'none';
-                            startMotion();
-                        } else {
-                            alert('Permiso denegado. Usa el dedo para interactuar.');
-                            iosPermissionOverlay.style.display = 'none';
-                        }
-                    })
-                    .catch(console.error);
-            });
-        } else {
-            motionEnabled = true;
-            startMotion();
-        }
+        document.addEventListener('touchmove', (e) => {
+            const touch = e.touches[0];
+            animateCard(touch.clientX, touch.clientY);
+        });
 
-        // 3. Motion Logic
-        function startMotion() {
-            window.addEventListener('deviceorientation', handleOrientation);
-            window.addEventListener('mousemove', handleMouseMove);
-        }
+        function animateCard(inputX, inputY) {
+            const x = (inputX / window.innerWidth - 0.5) * 20; // Rango reducido
+            const y = (inputY / window.innerHeight - 0.5) * 20;
 
-        function handleOrientation(event) {
-            if (!motionEnabled) return;
-            let x = event.gamma || 0; 
-            let y = event.beta || 0;
-            updateTilt(clamp(x, -40, 40), clamp(y, -40, 40));
-        }
-
-        function handleMouseMove(e) {
-            const x = (e.clientX / window.innerWidth - 0.5) * 60;
-            const y = (e.clientY / window.innerHeight - 0.5) * 60; 
-            updateTilt(x, y);
-        }
-
-        function clamp(val, min, max) {
-            return Math.min(Math.max(val, min), max);
-        }
-
-        function updateTilt(x, y) {
-            lastTiltX = x;
-            lastTiltY = y;
-            updateCardTransform(x, y);
-            updateHologram(x, y);
-        }
-
-        function updateCardTransform(x, y) {
-            // Lógica de rotación corregida para evitar que se baje
-            const baseRotateY = isFlipped ? 180 : 0;
+            // Pausar la animación de flotación CSS cuando interactuamos
+            card.style.animation = 'none';
             
-            // Reducimos la intensidad del tilt cuando está volteada para mantener estabilidad
-            // Invertimos Y cuando está flippeada para que el movimiento sea natural
-            const tiltX = isFlipped ? (y / 2) : (-y / 1.5); 
-            const tiltY = x / 1.5;
+            // Aplicar transformación sutil
+            card.style.transform = `rotateY(${x}deg) rotateX(${-y}deg)`;
 
-            // Importante: El orden importa. RotateY primero (flip base), luego el tilt fino.
-            card.style.transform = `rotateY(${baseRotateY + tiltY}deg) rotateX(${tiltX}deg)`;
+            // Mover holograma
+            const bgX = 50 + (x * 2);
+            const bgY = 50 + (y * 2);
+            holo.style.backgroundPosition = `${bgX}% ${bgY}%`;
+            holo.style.opacity = 0.5 + (Math.abs(x) + Math.abs(y)) / 50;
         }
 
-        function updateHologram(x, y) {
-            const bgPosX = 50 + (x * 2.5);
-            const bgPosY = 50 + (y * 2.5);
-            
-            const activeHolo = isFlipped ? holoBack : holoFront;
-            activeHolo.style.backgroundPosition = `${bgPosX}% ${bgPosY}%`;
+        // Restaurar animación flotante al dejar de tocar/mover
+        document.addEventListener('touchend', () => {
+            card.style.animation = 'float 6s ease-in-out infinite';
+        });
+        document.addEventListener('mouseleave', () => {
+            card.style.animation = 'float 6s ease-in-out infinite';
+        });
 
-            if (!isFlipped) {
-                // Parallax suave en la imagen
-                charImg.style.transform = `scale(1.05) translateX(${x/6}px) translateY(${y/6}px)`;
-                
-                const intensity = (Math.abs(x) + Math.abs(y)) / 100;
-                activeHolo.style.opacity = 0.3 + intensity;
-            }
-        }
     </script>
 </body>
 </html>
